@@ -1,185 +1,239 @@
-# Yachiyo 项目 API 文档
+# Yachiyo项目API文档
 
-## 项目概述
+## 1. 项目概述
 
-Yachiyo 是一个集成了 AI 聊天和语音合成功能的项目，包含以下组件：
+Yachiyo是一个完整的AI聊天系统，包含以下组件：
 
-- **EasyYachiyoClient**：基于 WPF 开发的前端应用
-- **EasyYachiyoClient-old**：基于 Python 开发的前端应用
-- **YachiyoClient**：基于 Python 开发的云端客户端
-- **YachiyoService**：基于 Java Spring Boot 开发的后端服务
-- **ollama**：模型训练文件
+- **后端服务** (`YachiyoService`): 基于Spring Boot的Java服务，提供AI聊天和语音合成功能
+- **WPF前端** (`EasyYachiyoClient`): 基于C#的桌面应用，提供丰富的用户界面
+- **Python前端** (`YachiyoClient`): 基于Tkinter的简单桌面应用
+- **Python前端(旧)** (`EasyYachiyoClient-old`): 早期版本的Python前端
+- **模型文件** (`ollama`): 包含模型训练配置
 
-## 后端服务 API
+## 2. API接口文档
 
-### 基础信息
+### 2.1 基础URL
 
-- **服务地址**：`http://127.0.0.1:8080`
-- **API 版本**：`v1`
-- **请求格式**：JSON (聊天接口) / 纯文本 (语音接口)
+默认基础URL: `http://localhost:8080`
 
-### 接口详情
+### 2.2 接口列表
 
-#### 1. 聊天接口
+| 接口路径 | 方法 | 功能描述 | 请求体 | 响应 |
+|---------|------|----------|--------|------|
+| `/api/v1/ai/chat` | POST | AI聊天 | 文本消息 | AI回复文本 |
+| `/api/v1/ai/speak` | POST | 文本转语音 | 文本消息 | 音频二进制数据 |
 
-**接口地址**：`/api/v1/ai/chat`
+### 2.3 详细接口说明
 
-**请求方法**：`POST`
+#### 2.3.1 聊天接口
 
-**请求体**：
+**接口**: `POST /api/v1/ai/chat`
+
+**功能**: 发送消息到AI并获取回复
+
+**请求体**:
 ```json
-{
-  "prompt": "聊天内容"
-}
+"你好，今天天气怎么样？"
 ```
 
-**响应**：
-- 成功：返回 AI 回复的文本内容
-- 失败：返回错误信息
-
-**示例**：
-```bash
-# 请求
-curl -X POST http://127.0.0.1:8080/api/v1/ai/chat \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "你好，我是用户"}'
-
-# 响应
-"你好！我是 Yachiyo，很高兴为你服务。"
+**响应**:
+```
+"今天天气很好，阳光明媚，适合外出活动。"
 ```
 
-#### 2. 语音合成接口
+**实现说明**:
+- 使用Spring AI的ChatClient与AI模型交互
+- 直接返回AI的回复内容
 
-**接口地址**：`/api/v1/ai/speak`
+#### 2.3.2 语音合成接口
 
-**请求方法**：`POST`
+**接口**: `POST /api/v1/ai/speak`
 
-**请求体**：纯文本内容
+**功能**: 将文本转换为语音
 
-**响应**：
-- 成功：返回音频数据（byte[]）
-- 失败：返回错误信息
-
-**示例**：
-```bash
-# 请求
-curl -X POST http://127.0.0.1:8080/api/v1/ai/speak \
-  -H "Content-Type: text/plain" \
-  -d "你好，我是 Yachiyo"
-
-# 响应
-[音频二进制数据]
+**请求体**:
+```json
+"你好，我是Yachiyo。"
 ```
 
-## 后端服务实现细节
+**响应**:
+- 音频二进制数据（byte[]）
 
-### 语音合成流程
+**实现说明**:
+1. 首先将文本翻译成日语
+2. 调用外部TTS服务（`http://0.0.0.0:9882`）生成语音
+3. 返回音频二进制数据
 
-1. 接收前端发送的文本
-2. 将文本翻译成日语
-3. 构造 TTS 请求对象
-4. 调用语音合成服务（地址：`http://0.0.0.0:9882`）
-5. 接收并返回音频数据
+## 3. 前端调用示例
 
-### 核心类
+### 3.1 Python前端调用
 
-- **AIChatController**：处理 API 请求
-- **SpeakService**：语音合成服务接口
-- **SpeakServiceImpl**：语音合成服务实现
-- **TTSRequest**：语音合成请求数据结构
+```python
+import requests
 
-## 前端集成
+# 发送聊天请求
+url = "http://localhost:8080/api/v1/ai/chat"
+message = "你好，今天天气怎么样？"
+response = requests.post(url, data=message)
+print(response.text)
 
-### WPF 前端（EasyYachiyoClient）
+# 发送语音合成请求
+url = "http://localhost:8080/api/v1/ai/speak"
+message = "你好，我是Yachiyo。"
+response = requests.post(url, data=message)
+# 保存音频文件
+with open("output.mp3", "wb") as f:
+    f.write(response.content)
+```
 
-#### 聊天功能集成
+### 3.2 WPF前端调用
 
 ```csharp
-// 发送消息到后端
+// 发送聊天请求
 using HttpClient client = new HttpClient();
-client.Timeout = System.TimeSpan.FromSeconds(30);
-
-// 构建请求体
-var requestBody = new { prompt = messageContent };
+var requestBody = new { prompt = "你好，今天天气怎么样？" };
 string jsonBody = JsonSerializer.Serialize(requestBody);
 var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-
-// 发送请求
-HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:8080/api/v1/ai/chat", content);
-response.EnsureSuccessStatusCode();
-
-// 读取响应
+string apiUrl = "http://localhost:8080/api/v1/ai/chat";
+HttpResponseMessage response = await client.PostAsync(apiUrl, content);
 string responseContent = await response.Content.ReadAsStringAsync();
+
+// 发送语音合成请求
+apiUrl = "http://localhost:8080/api/v1/ai/speak";
+content = new StringContent("你好，我是Yachiyo。", Encoding.UTF8, "text/plain");
+response = await client.PostAsync(apiUrl, content);
+byte[] audioData = await response.Content.ReadAsByteArrayAsync();
 ```
 
-#### 语音合成功能集成
+## 4. 服务依赖关系
 
-```csharp
-// 调用语音合成服务
-using HttpClient client = new HttpClient();
-client.Timeout = TimeSpan.FromSeconds(30);
+### 4.1 后端服务依赖
 
-// 直接发送文本内容
-var content = new StringContent(text);
-HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:8080/api/v1/ai/speak", content, cancellationToken);
-response.EnsureSuccessStatusCode();
+- **Spring Boot**: 基础框架
+- **Spring AI**: 提供AI聊天功能
+- **RestTemplate**: 用于HTTP请求
+- **百度翻译API**: 用于文本翻译
+- **外部TTS服务**: 运行在 `http://0.0.0.0:9882`
 
-// 读取音频数据
-byte[] audioData = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-```
+### 4.2 前端依赖
 
-### Python 前端（EasyYachiyoClient-old）
+#### WPF前端
+- **.NET 8.0**: 运行环境
+- **CefSharp**: 用于Web视图
+- **SevenZipExtractor**: 用于解压功能
 
-类似的集成方式，使用 Python 的 `requests` 库发送 HTTP 请求。
+#### Python前端
+- **Python 3.x**: 运行环境
+- **tkinter**: 用于GUI
+- **requests**: 用于HTTP请求
 
-## 项目结构
+## 5. 部署说明
+
+### 5.1 后端服务部署
+
+1. **环境准备**:
+   - JDK 17+
+   - Maven 3.6+
+
+2. **构建步骤**:
+   ```bash
+   cd YachiyoService
+   mvn clean package
+   ```
+
+3. **运行服务**:
+   ```bash
+   java -jar Controller/target/Controller-0.0.1-SNAPSHOT.jar
+   ```
+
+4. **配置文件**:
+   - `Config/src/main/resources/application.yml`: 应用配置
+   - `Config/src/main/resources/application-secret.yml`: 密钥配置
+
+### 5.2 前端部署
+
+#### WPF前端
+1. 使用Visual Studio打开 `EasyYachiyoClient.sln`
+2. 构建解决方案
+3. 运行生成的可执行文件
+
+#### Python前端
+1. 安装依赖:
+   ```bash
+   pip install requests
+   ```
+2. 运行应用:
+   ```bash
+   python yachiyo.py
+   ```
+
+## 6. 配置选项
+
+### 6.1 后端配置
+
+- **服务端口**: 默认8080
+- **AI模型配置**: 在 `AIConfig.java` 中设置
+- **翻译API配置**: 需要在 `TransUtil` 中配置百度翻译API密钥
+
+### 6.2 前端配置
+
+#### WPF前端
+- **API地址配置**: 在 `AddressConfigurationManager.cs` 中设置
+- **其他配置**: 在 `SettingsManager.cs` 中管理
+
+#### Python前端
+- **API地址配置**: 在 `config.json` 文件中设置
+
+## 7. 项目结构
 
 ```
 TsukimiYachiyo/
-├── EasyYachiyoClient/         # WPF 前端
-├── EasyYachiyoClient-old/     # Python 前端
-├── ollama/                    # 模型训练文件
-│   ├── v0.0.1/                # 模型版本 1
-│   └── v0.0.2/                # 模型版本 2
-├── YachiyoClient/             # Python 云端客户端
-└── YachiyoService/            # Java 后端服务
-    ├── Common/                # 公共模块
+├── EasyYachiyoClient/         # WPF前端
+│   ├── Model/                 # 数据模型
+│   ├── Utils/                 # 工具类
+│   ├── ViewModel/             # 视图模型
+│   └── resource/              # 资源文件
+├── EasyYachiyoClient-old/     # 旧Python前端
+├── ollama/                    # 模型文件
+│   ├── v0.0.1/                # 版本1
+│   └── v0.0.2/                # 版本2
+├── YachiyoClient/             # Python前端
+└── YachiyoService/            # 后端服务
+    ├── Common/                # 通用模块
     ├── Config/                # 配置模块
-    ├── Controller/            # 控制器模块
-    ├── Service/               # 服务模块
+    ├── Controller/            # 控制器
+    ├── Service/               # 服务层
     └── dto/                   # 数据传输对象
 ```
 
-## 环境要求
+## 8. 故障排除
 
-### 后端服务
+### 8.1 常见问题
 
-- Java 8+
-- Spring Boot 3.0+
-- Maven
+1. **API连接失败**:
+   - 检查后端服务是否运行
+   - 检查API地址配置是否正确
 
-### 前端应用
+2. **语音合成失败**:
+   - 检查外部TTS服务是否运行在 `http://0.0.0.0:9882`
+   - 检查翻译API配置是否正确
 
-- WPF：.NET 8.0+
-- Python 前端：Python 3.7+
+3. **前端启动失败**:
+   - WPF前端: 检查.NET 8.0运行时是否安装
+   - Python前端: 检查Python环境和依赖是否正确
 
-## 运行说明
+### 8.2 日志
 
-1. 启动后端服务：在 YachiyoService 目录下执行 `mvn spring-boot:run`
-2. 启动前端应用：运行 EasyYachiyoClient.exe 或 Python 脚本
-3. 确保语音合成服务（地址：`http://0.0.0.0:9882`）已启动
+- **后端日志**: 控制台输出
+- **WPF前端日志**: `bin/Debug/net8.0-windows/logs/` 目录
 
-## 常见问题
+## 9. 版本历史
 
-1. **API 调用失败**：检查后端服务是否运行，端口是否正确
-2. **语音合成失败**：检查语音合成服务是否运行，地址是否正确
-3. **翻译失败**：检查翻译服务配置是否正确
+| 版本 | 日期 | 变更内容 |
+|------|------|----------|
+| v0.0.1 | - | 初始版本 |
+| v0.0.2 | - | 模型更新 |
 
-## 版本历史
-
-- v0.0.1：初始版本
-- v0.0.2：优化语音合成功能
-
-## 联系方式
+## 10. 联系方式
 
 如有问题，请联系项目维护者。
