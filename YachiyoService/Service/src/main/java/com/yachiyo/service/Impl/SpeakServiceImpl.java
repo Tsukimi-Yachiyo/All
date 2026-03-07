@@ -1,6 +1,7 @@
 package com.yachiyo.service.Impl;
 
 import com.yachiyo.Config.TransformConfig;
+import com.yachiyo.dto.SpeakRequest;
 import com.yachiyo.service.SpeakService;
 import com.yachiyo.dto.TTSRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,9 @@ public class SpeakServiceImpl implements SpeakService {
     private RestTemplate restTemplate;
 
     @Override
-    public byte[] textToSpeech(String text) {
+    public byte[] textToSpeech(SpeakRequest speakRequest) {
         // 将文字翻译成日语
-        String japaneseText = transformConfig.translate(text, "zh", "jp");
+        String japaneseText = transformConfig.translate(speakRequest.getText(), "auto", "jp");
 
         TTSRequest ttsRequest = new TTSRequest();
         ttsRequest.setText(japaneseText);

@@ -1,5 +1,8 @@
 package com.yachiyo.controller;
 
+import com.yachiyo.dto.SpeakRequest;
+import com.yachiyo.dto.TTSRequest;
+import com.yachiyo.service.ChatService;
 import com.yachiyo.service.SpeakService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -22,6 +25,9 @@ public class AIChatController {
     @Autowired
     private SpeakService speakService;
 
+    @Autowired
+    private ChatService chatService;
+
     @PostMapping("/chat")
     public String Chat(@RequestBody String message) {
         return chatClient.prompt()
@@ -31,7 +37,7 @@ public class AIChatController {
     }
 
     @PostMapping("/speak")
-    public byte[] Speak(@RequestBody String message){
-        return speakService.textToSpeech(message);
+    public byte[] Speak(@RequestBody SpeakRequest speakRequest){
+        return speakService.textToSpeech(speakRequest);
     }
 }

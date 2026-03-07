@@ -2,17 +2,22 @@
 spring:
   application:
     name: Yachiyo
-    yaml:
+
+
   profiles:
     include: secret
-  ai:
-    ollama:
-      chat:
-        options:
-          model: 1473443474/tsukimi-yachiyo
-      embedding:
-        enabled: true
-        model: all-minilm
-      base-url: http://localhost:11434
+    active: dev
 
-
+# 服务器配置
+server:
+  port: 8080
+  tomcat:
+    connection-timeout: PT30S
+    max-connections: 500
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,text/javascript,application/javascript
+    min-response-size: 2048
+  ssl:
+    enabled: false
+  forward-headers-strategy: framework

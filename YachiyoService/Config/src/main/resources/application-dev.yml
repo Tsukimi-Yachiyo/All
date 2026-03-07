@@ -1,0 +1,47 @@
+# 开发环境
+
+# spring 配置
+spring:
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/yachiyo?useSSL=false&serverTimezone=UTC
+    username: ${mysql.username}
+    password: ${mysql.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  # 模型配置
+  ai:
+    ollama:
+      chat:
+        options:
+          model: 1473443474/tsukimi-yachiyo
+      embedding:
+        enabled: true
+        model: all-minilm
+      base-url: http://localhost:11434
+
+# mybatis-plus 配置
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign-id
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.tsukimi.yachiyo.entity
+
+# 日志配置
+logging:
+  level:
+    com.sicau: DEBUG
+    org.springframework.jdbc: DEBUG
+
+# 安全配置
+security:
+  open-api: /api/v1/auth/login,/api/v1/auth/register
+
+# jwt 配置
+jwt:
+  secret: "12345678901234567890123456789012"
+  expiration: 3600000
+  token-header: "Authorization"
+  token-prefix: "Bearer "
