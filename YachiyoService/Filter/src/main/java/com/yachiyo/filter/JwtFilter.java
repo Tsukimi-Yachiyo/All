@@ -8,28 +8,29 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-@Component
+@Component @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtils jwtUtils;
 
-    @Autowired
-    private FastMethodConfig fastMethodConfig;
-
-
-    @Value("${application.security.open-api}")
+    @Value("${security.open-api}")
     private String[] openApi;
 
     // 在类中添加路径匹配器
@@ -40,9 +41,13 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
             if (jwt != null && jwtUtils.isTokenValid(jwt)) {
+                String userId = jwtUtils.getUserIdFromToken(jwt);
                 // 验证通过，继续处理请求
-                User user = fastMethodConfig.getUserFromToken(jwt);
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null);
+                String username = jwtUtils.getNameFromToken(jwt);
+                User user = new User(Integer.parseInt(userId), username, null, null);
+                List<GrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null, authorities);
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 filterChain.doFilter(request, response);
@@ -51,7 +56,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             // 处理异常，返回内部服务器错误
-            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "服务器错误");
+            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "服务器错误"+e.getMessage());
         }
     }
 

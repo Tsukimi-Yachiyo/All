@@ -11,6 +11,6 @@ public interface SpeakService {
      * @return 合成后的语音文件路径
      */
     @Schema(description = "待合成语音的文本")
-    byte[] textToSpeech(SpeakRequest speakRequest);
+    byte[] TextToSpeech(SpeakRequest speakRequest);
 
 }

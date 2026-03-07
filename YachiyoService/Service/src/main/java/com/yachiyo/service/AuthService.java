@@ -1,6 +1,7 @@
 package com.yachiyo.service;
 
 import com.yachiyo.dto.LoginRequest;
+import com.yachiyo.dto.RegisterRequest;
 import com.yachiyo.result.Result;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -12,7 +13,7 @@ public interface AuthService {
      * @return 登录结果
      */
     @Schema(description = "登录请求")
-    public Result<Boolean> Login(LoginRequest loginRequest);
+    public Result<String> Login(LoginRequest loginRequest);
 
     /**
      * 注册
@@ -20,5 +21,5 @@ public interface AuthService {
      * @return 注册结果
      */
     @Schema(description = "注册请求")
-    public com.yachiyo.result.Result<Boolean> Register(com.yachiyo.dto.RegisterRequest registerRequest);
+    public Result<String> Register(RegisterRequest registerRequest);
 }

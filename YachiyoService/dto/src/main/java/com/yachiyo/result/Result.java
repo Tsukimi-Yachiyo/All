@@ -31,23 +31,6 @@ public class Result <T>{
         return result;
     }
 
-     /**
-     * 成功返回结果
-     * @param message 消息
-     * @return Result<T>
-     */
-    public static <T> Result<T> success(String message) {
-        Result<T> result = new Result<>();
-        result.setCode("200");
-        result.setMessage(message);
-        result.setData(null);
-
-        result.setDetail(null);
-        log(true, result);
-
-        return result;
-    }
-
     /**
      * 成功返回结果
      * @return Result<T>
@@ -57,6 +40,21 @@ public class Result <T>{
         result.setCode("200");
         result.setMessage("success");
         result.setData(null);
+        result.setDetail(null);
+        log(true, result);
+        return result;
+    }
+
+    /**
+     * 成功返回结果
+     * @param data 数据
+     * @return Result<T>
+     */
+    public static <T> Result<T> success(T data) {
+        Result<T> result = new Result<>();
+        result.setCode("200");
+        result.setMessage("success");
+        result.setData(data);
         result.setDetail(null);
         log(true, result);
         return result;

@@ -17,8 +17,8 @@ public class SpeakServiceImpl implements SpeakService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Override
-    public byte[] textToSpeech(SpeakRequest speakRequest) {
+     @Override
+    public byte[] TextToSpeech(SpeakRequest speakRequest) {
         // 将文字翻译成日语
         String japaneseText = transformConfig.translate(speakRequest.getText(), "auto", "jp");
 

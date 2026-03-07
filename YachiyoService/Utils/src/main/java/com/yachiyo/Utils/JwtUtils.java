@@ -37,11 +37,15 @@ public class JwtUtils {
 
     /**
      * 生成JWT令牌
+     * @param userId 用户id
+     * @param name 用户名
+     * @param uniqueCode 唯一标识
+     * @return JWT令牌
      */
-    public String generateToken(Long userId, String phone, String uniqueCode) {
+    public String generateToken(Long userId, String name, String uniqueCode) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userID", userId);
-        claims.put("phone", phone);
+        claims.put("name", name);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -54,6 +58,7 @@ public class JwtUtils {
 
     /**
      * 生成状态安全令牌
+     * @return 状态安全令牌
      */
     public String generateToken() {
         return Jwts.builder()
@@ -66,30 +71,36 @@ public class JwtUtils {
 
     /**
      * 从JWT令牌中提取用户id
+     * @param token JWT令牌
+     * @return 用户id
      */
-    public Long getUserIdFromToken(String token) {
-        return (Long) Jwts.parserBuilder()
+    public String getUserIdFromToken(String token) {
+        return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("userID");
+                .get("userID").toString();
     }
 
     /**
      * 从JWT令牌中提取手机号
+     * @param token JWT令牌
+     * @return 用户名
      */
-    public String getPhoneFromToken(String token) {
+    public String getNameFromToken(String token) {
         return (String) Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("phone");
+                .get("name");
     }
 
     /**
      * 从JWT令牌中提取唯一标识
+     * @param token JWT令牌
+     * @return 唯一标识
      */
     public String getUniqueCodeFromToken(String token) {
         return Jwts.parserBuilder()
@@ -102,6 +113,8 @@ public class JwtUtils {
 
     /**
      * 从JWT令牌中提取Claims
+     * @param token JWT令牌
+     * @return Claims
      */
     public Map<String, Object> getClaimsFromToken(String token) {
         return Jwts.parserBuilder()
@@ -113,6 +126,8 @@ public class JwtUtils {
 
     /**
      * 检查令牌是否有效
+     * @param token JWT令牌
+     * @return 是否有效
      */
     public boolean isTokenValid(String token) {
         try {

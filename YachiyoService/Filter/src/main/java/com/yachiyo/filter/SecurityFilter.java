@@ -17,7 +17,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityFilter extends AbstractHttpConfigurer<SecurityFilter, HttpSecurity> {
+public class SecurityFilter  extends AbstractHttpConfigurer<SecurityFilter, HttpSecurity> {
+
     @Value("${security.open-api}")
     private String[] openApi;
 
@@ -25,10 +26,12 @@ public class SecurityFilter extends AbstractHttpConfigurer<SecurityFilter, HttpS
     private JwtFilter jwtFilter;
 
     @Bean
-    public DefaultSecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public DefaultSecurityFilterChain filterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(openApi).permitAll()
+                        .requestMatchers("/api/v3/**").permitAll()
+                        .requestMatchers("/api/v2/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)

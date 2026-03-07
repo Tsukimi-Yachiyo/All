@@ -3,7 +3,7 @@ spring:
   application:
     name: Yachiyo
 
-
+  # 环境配置
   profiles:
     include: secret
     active: dev

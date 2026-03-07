@@ -1,7 +1,9 @@
 package com.yachiyo.controller;
 
+import com.yachiyo.dto.ChatRequest;
 import com.yachiyo.dto.SpeakRequest;
 import com.yachiyo.dto.TTSRequest;
+import com.yachiyo.result.Result;
 import com.yachiyo.service.ChatService;
 import com.yachiyo.service.SpeakService;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
-@RequestMapping("/api/v1/ai")
+@RequestMapping("/api/v2/ai")
 @RequiredArgsConstructor
 @Validated
 public class AIChatController {
@@ -29,15 +33,17 @@ public class AIChatController {
     private ChatService chatService;
 
     @PostMapping("/chat")
-    public String Chat(@RequestBody String message) {
-        return chatClient.prompt()
-                .user(message)
-                .call()
-                .content();
+    public Result<String> Chat(@RequestBody @Valid ChatRequest chatRequest) {
+        return chatService.Chat(chatRequest);
     }
 
     @PostMapping("/speak")
-    public byte[] Speak(@RequestBody SpeakRequest speakRequest){
-        return speakService.textToSpeech(speakRequest);
+    public byte[] Speak(@RequestBody @Valid SpeakRequest speakRequest){
+        return speakService.TextToSpeech(speakRequest);
+    }
+
+    @PostMapping("/create")
+    public Result<String> Create(){
+        return chatService.Create();
     }
 }

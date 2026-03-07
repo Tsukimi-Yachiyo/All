@@ -30,6 +30,7 @@
         <module>dto</module>
         <module>entity</module>
         <module>Utils</module>
+        <module>Mapper</module>
     </modules>
     <scm>
         <connection/>
@@ -42,6 +43,15 @@
         <spring-ai.version>2.0.0-M2</spring-ai.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.5.0</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>

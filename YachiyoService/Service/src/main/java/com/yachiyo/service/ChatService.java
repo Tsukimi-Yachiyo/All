@@ -13,4 +13,11 @@ public interface ChatService {
      */
     @Schema(description = "聊天请求")
     public Result<String> Chat(ChatRequest chatRequest);
+
+     /**
+     * 创建会话
+     * @return 会话ID
+     */
+    @Schema(description = "创建会话")
+    public Result<String> Create();
 }
