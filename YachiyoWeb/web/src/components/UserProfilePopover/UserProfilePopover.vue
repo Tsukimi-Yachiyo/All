@@ -1,4 +1,5 @@
 <script setup>
+import { watch } from 'vue';
 import { useUserProfilePopover } from '../../composables/useUserProfilePopover.js';
 
 const props = defineProps({
@@ -12,7 +13,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['go-settings']);
+const emit = defineEmits(['go-settings', 'logout', 'update:isVisible']);
 
 const {
   isVisible,
@@ -22,6 +23,11 @@ const {
   keepVisible,
   goToSettings
 } = useUserProfilePopover(props, emit);
+
+// 监听isVisible变化并通知父组件
+watch(isVisible, (newValue) => {
+  emit('update:isVisible', newValue);
+});
 </script>
 
 <template src="./templates/UserProfilePopover.html"></template>

@@ -18,6 +18,16 @@ const routes = [
     }
   },
   {
+    path: '/tsukuyomi',
+    name: 'Tsukuyomi',
+    // 懒加载月读页面组件
+    component: () => import('../pages/Tsukuyomi/Tsukuyomi.vue'),
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/settings',
     name: 'Settings',
     // 懒加载设置页面组件

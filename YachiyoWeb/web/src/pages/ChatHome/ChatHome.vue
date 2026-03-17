@@ -1,7 +1,11 @@
 <script setup>
+import { ref } from 'vue';
 import { useChatHome } from '../../composables/useChatHome.js';
-import UserProfilePopover from '../../components/UserProfilePopover/UserProfilePopover.vue';
+import AppHeader from '../../components/AppHeader/AppHeader.vue';
 import Live2DModel from '../../components/Live2DModel/Live2DModel.vue';
+import { useModelLoading } from '../../composables/useModelLoading.js';
+
+const userProfileIsVisible = ref(false);
 
 const {
   username,
@@ -10,7 +14,7 @@ const {
   currentConversationId,
   messages,
   inputMessage,
-  isLoading,
+  isLoading: isChatLoading,
   isTyping,
   isCreating,
   messageListRef,
@@ -29,6 +33,11 @@ const {
   playVoice,
   logout
 } = useChatHome();
+
+// 获取模型加载状态
+const { isLoading: isModelLoading, loadProgress, loadStatus } = useModelLoading();
+
+
 </script>
 
 <template src="./templates/ChatHome.html"></template>

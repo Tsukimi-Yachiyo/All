@@ -8,9 +8,25 @@ const {
   isLoading,
   error,
   loginSuccess,
+  isVideoLoaded,
+  isRegisterMode,
+  captchaUrl,
+  captchaInput,
+  email,
+  code,
+  codeCountdown,
+  isSendingCode,
+  showCaptchaModal,
   form,
   onIntroEnd,
-  handleSubmit
+  handleSubmit,
+  handleRegister,
+  handleFormSubmit,
+  toggleMode,
+  refreshCaptcha,
+  handleSendVerificationCode,
+  handleConfirmCaptcha,
+  handleCloseCaptchaModal
 } = useLogin();
 </script>
 

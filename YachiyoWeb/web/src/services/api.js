@@ -104,48 +104,53 @@ export const chatAPI = {
       function processChunk() {
         return reader.read().then(({ done, value }) => {
           if (done) {
+            console.log('SSE 流已结束');
             // 当流结束时，即使没有收到 [DONE] 信号，也调用完成回调
             onComplete && onComplete();
             return;
           }
 
-          buffer += decoder.decode(value, { stream: true });
-          
-          // 处理多个 data 块连在一起的情况，例如 data:嗨data:~
-          let processedBuffer = buffer;
-          while (processedBuffer.includes('data:')) {
-            const dataIndex = processedBuffer.indexOf('data:');
-            if (dataIndex === -1) break;
+          if (value) {
+            buffer += decoder.decode(value, { stream: true });
+            console.log('收到 SSE 数据:', buffer);
             
-            // 找到下一个 data: 的位置或行尾
-            const nextDataIndex = processedBuffer.indexOf('data:', dataIndex + 5);
-            let dataChunk;
-            if (nextDataIndex === -1) {
-              dataChunk = processedBuffer.slice(dataIndex + 5);
-              processedBuffer = '';
-            } else {
-              dataChunk = processedBuffer.slice(dataIndex + 5, nextDataIndex);
-              processedBuffer = processedBuffer.slice(nextDataIndex);
-            }
-            
-            const dataStr = dataChunk.trim();
-            if (dataStr === '[DONE]') {
-              onComplete && onComplete();
-              return;
-            }
-            if (dataStr) {
-              try {
-                // 直接使用 dataStr，因为后端直接返回 SseEmitter 的内容
-                // 即使只返回一个字，也直接追加
-                onData && onData(dataStr);
-              } catch (e) {
-                console.error('解析 SSE 数据失败:', e);
+            // 处理多个 data 块连在一起的情况，例如 data:嗨data:~
+            let processedBuffer = buffer;
+            while (processedBuffer.includes('data:')) {
+              const dataIndex = processedBuffer.indexOf('data:');
+              if (dataIndex === -1) break;
+              
+              // 找到下一个 data: 的位置或行尾
+              const nextDataIndex = processedBuffer.indexOf('data:', dataIndex + 5);
+              let dataChunk;
+              if (nextDataIndex === -1) {
+                dataChunk = processedBuffer.slice(dataIndex + 5);
+                processedBuffer = '';
+              } else {
+                dataChunk = processedBuffer.slice(dataIndex + 5, nextDataIndex);
+                processedBuffer = processedBuffer.slice(nextDataIndex);
+              }
+              
+              const dataStr = dataChunk.trim();
+              if (dataStr === '[DONE]') {
+                console.log('收到 [DONE] 信号');
+                onComplete && onComplete();
+                return;
+              }
+              if (dataStr) {
+                try {
+                  // 直接使用 dataStr，因为后端直接返回 SseEmitter 的内容
+                  // 即使只返回一个字，也直接追加
+                  onData && onData(dataStr);
+                } catch (e) {
+                  console.error('解析 SSE 数据失败:', e);
+                }
               }
             }
+            
+            // 保存剩余的未处理数据
+            buffer = processedBuffer;
           }
-          
-          // 保存剩余的未处理数据
-          buffer = processedBuffer;
 
           return processChunk();
         }).catch(error => {

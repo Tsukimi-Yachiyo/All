@@ -94,6 +94,7 @@ export function useLive2D() {
       canvas.width = wrapper.clientWidth;
       canvas.height = wrapper.clientHeight;
 
+      // 初始化 Live2D
       initCubismFramework();
       LAppPal.updateTime();
 
