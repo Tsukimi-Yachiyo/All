@@ -4,7 +4,10 @@ on:
   schedule:
     - cron: "0 0 * * *"  # 每天 UTC 0点（北京时间 8点）
   workflow_dispatch:     # 允许手动触发
-
+  
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  
 jobs:
   sync:
     runs-on: ubuntu-latest
